@@ -1,0 +1,40 @@
+version: '3.5'
+
+networks:
+  localdev:
+    name: localdev
+
+services:
+
+  books-api:
+    build:
+      context: .
+      dockerfile: ./src/Books.Api/dockerfile
+    container_name: books-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:5470
+      - books.Api_StorageSettings:ConnectionString=server=books-db;uid=user;pwd=password;database=books
+    ports:
+      - "5470:5470"
+    networks:
+      - localdev
+    restart: always
+    depends_on:
+      - books-db
+  
+  books-db:
+    build:
+      context: .
+      dockerfile: ./database/dockerfile
+    container_name: books-db
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: books
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - 3306:3306
+    restart: always
+    networks:
+      - localdev
